@@ -26,7 +26,7 @@ function App() {
 
   // grab article data from the server (https://simplepedia-server.herokuapp.com/api/articles)
   useEffect(() => {
-    fetch('https://simplepedia-server.herokuapp.com/api/articles/')
+    fetch('/api/articles/')
       .then(response => {
         if (!response.ok) {
           throw new Error(response.statusText);
@@ -41,16 +41,64 @@ function App() {
 
   const handleEditorReturn = newArticle => {
     if (newArticle) {
-      // Remove edited article if it exists
-      const newCollection = collection.filter(
-        article => article !== currentArticle
-      );
-      newCollection.push(newArticle);
-      setCollection(newCollection);
-      setCurrentArticle(newArticle);
+      if (currentArticle) {
+        // merge properties of the currentArticle with the newArticle
+        const updatedArticle = { ...currentArticle, ...newArticle };
+        const articleId = updatedArticle.id;
+        fetch(`/api/articles/${articleId}`, {
+          method: 'PUT',
+          body: JSON.stringify(updatedArticle),
+          headers: new Headers({ 'Content-type': 'application/json' })
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(response.statusText);
+            }
+            return response.json();
+          })
+          .then(data => {
+            // create new collection of articles
+            const alteredArticles = collection.map(article => {
+              if (article.id === data.id) {
+                return data;
+              }
+              return article;
+            });
+            setCollection(alteredArticles);
+            setCurrentArticle(data);
+          })
+          .catch(err => console.log(err)); // eslint-disable-line no-console
+      } else {
+        fetch('/api/articles/', {
+          method: 'POST',
+          body: JSON.stringify(newArticle),
+          headers: new Headers({ 'Content-type': 'application/json' })
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(response.statusText);
+            }
+          })
+          .then(data => {
+            const alteredArticles = [];
+            alteredArticles.push(data);
+            setCollection(alteredArticles);
+            setCurrentArticle(data);
+          })
+          .catch(err => console.log(err)); // eslint-disable-line no-console
+      }
     }
     setMode('view');
   };
+
+  //   // Remove edited article if it exists
+  //   const newCollection = collection.filter(
+  //     article => article !== currentArticle
+  //   );
+  //   newCollection.push(newArticle);
+  //   setCollection(newCollection);
+  //   setCurrentArticle(newArticle);
+  // }
 
   //Are we editing?
   if (mode === 'edit') {
