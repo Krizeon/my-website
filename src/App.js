@@ -39,6 +39,24 @@ function App() {
       .catch(err => console.log(err)); // eslint-disable-line no-console
   }, []);
 
+  const handleDelete = article => {
+    const articleId = article.id;
+    fetch(`/api/articles/${articleId}`, {
+      method: 'DELETE',
+      body: JSON.stringify(article),
+      headers: new Headers({ 'Content-type': 'application/json' })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+        const deleteArticle = collection.filter(a => a.id !== article.id);
+        setCollection(deleteArticle);
+        setCurrentArticle(null);
+      })
+      .catch(err => console.log(err)); // eslint-disable-line no-console
+  };
+
   const handleEditorReturn = newArticle => {
     if (newArticle) {
       if (currentArticle) {
@@ -78,9 +96,10 @@ function App() {
             if (!response.ok) {
               throw new Error(response.statusText);
             }
+            return response.json();
           })
           .then(data => {
-            const alteredArticles = [];
+            let alteredArticles = [...collection];
             alteredArticles.push(data);
             setCollection(alteredArticles);
             setCurrentArticle(data);
@@ -90,16 +109,6 @@ function App() {
     }
     setMode('view');
   };
-
-  //   // Remove edited article if it exists
-  //   const newCollection = collection.filter(
-  //     article => article !== currentArticle
-  //   );
-  //   newCollection.push(newArticle);
-  //   setCollection(newCollection);
-  //   setCurrentArticle(newArticle);
-  // }
-
   //Are we editing?
   if (mode === 'edit') {
     return (
@@ -134,6 +143,16 @@ function App() {
       }}
     />
   );
+  // button for deleting articles
+  const deleteButton = (
+    <input
+      type="button"
+      value="Delete Article"
+      onClick={() => {
+        handleDelete(currentArticle);
+      }}
+    />
+  );
 
   // Utilize conditional rendering to only display the Article and edit button components when
   // there is a currentArticle
@@ -147,7 +166,8 @@ function App() {
       />
       {currentArticle && <Article article={currentArticle} />}
       <ButtonBar>
-        {newButton} {currentArticle && editButton}
+        {newButton} {currentArticle && editButton}{' '}
+        {currentArticle && deleteButton}
       </ButtonBar>
     </div>
   );
