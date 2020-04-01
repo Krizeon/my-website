@@ -2,13 +2,13 @@
   "name": "assignment4-starter",
   "version": "0.1.0",
   "private": true,
-  "author": "Your name <your email>",
+  "author": "Kevin Hernandez <kevinh@middlebury.edu>",
   "contributors": [
     "Christopher Andrews <candrews@middlebury.edu>",
     "Michael Linderman <mlinderman@middlebury.edu>",
     "Davin Chia <dchia@middlebury.edu>"
   ],
-  "proxy": "http://basin.cs.middlebury.edu:3042",
+  "proxy": "https://simplepedia-server.herokuapp.com,",
   "dependencies": {
     "prop-types": "^15.7.2",
     "react": "^16.12.0",

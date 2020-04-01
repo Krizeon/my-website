@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import data from './seed.json';
+//import data from './seed.json';
 import IndexBar from './components/IndexBar';
 import Article from './components/Article';
 import Editor from './components/Editor';
@@ -21,8 +21,23 @@ function App() {
   // Create three state variables to store the article collection, the current article
   // and the mode ('view' or 'edit')
   const [currentArticle, setCurrentArticle] = useState(null);
-  const [collection, setCollection] = useState(data);
+  const [collection, setCollection] = useState([]);
   const [mode, setMode] = useState('view');
+
+  // grab article data from the server (https://simplepedia-server.herokuapp.com/api/articles)
+  useEffect(() => {
+    fetch('https://simplepedia-server.herokuapp.com/api/articles/')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+        return response.json();
+      })
+      .then(data => {
+        setCollection(data);
+      })
+      .catch(err => console.log(err)); // eslint-disable-line no-console
+  }, []);
 
   const handleEditorReturn = newArticle => {
     if (newArticle) {
